@@ -1,31 +1,34 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
-  "builds": [
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/dist",
+  "installCommand": "cd backend && npm install && cd ../frontend && npm install",
+  "framework": "vite",
+  "rewrites": [
     {
-      "src": "backend/dist/main.js",
-      "use": "@vercel/node"
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
     },
     {
-      "src": "frontend/dist/**",
-      "use": "@vercel/static"
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
     }
   ],
-  "routes": [
+  "functions": {
+    "api/**/*.ts": {
+      "maxDuration": 10
+    }
+  },
+  "headers": [
     {
-      "src": "/api/(.*)",
-      "dest": "backend/dist/main.js"
-    },
-    {
-      "src": "/(assets/.*)",
-      "dest": "frontend/dist/$1"
-    },
-    {
-      "src": "/(.*\\.(js|css|ico|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot|json))",
-      "dest": "frontend/dist/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "frontend/dist/index.html"
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
     }
   ]
 }
